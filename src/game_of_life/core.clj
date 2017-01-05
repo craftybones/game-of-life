@@ -30,10 +30,22 @@
   [current-generation]
   (comp (partial = 3) (number-of-live-neighbours current-generation)))
 
-(defn two-or-three-live-neighbours? [current-generation]
+(defn two-or-three-live-neighbours?
+  "Given a set of positions of live cells returns f(x)
+  where x is a position of form [r c]. f(x) returns
+  true when there are either two or three live neighbors
+  around x."
+  [current-generation]
   (comp #(<= 2 % 3) (number-of-live-neighbours current-generation)))
 
-(defn neighbors-that-may-come-alive [current-generation]
+(defn neighbors-that-may-come-alive
+  "Given a set of positions of live cells returns a transducer.
+  The transducer will filter co-ordinates with dead neighbours
+  that have exactly three living neighbours around them.
+
+  Effectively this forms the set of dead neighbours that will
+  come alive in the next generation."
+  [current-generation]
   (comp (mapcat neighboring)
         (filter (complement current-generation))
         (filter (three-live-neighbours? current-generation))))

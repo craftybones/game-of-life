@@ -47,4 +47,37 @@
         (three-live-around? [1 0])
         (three-live-around? [1 1])
         (three-live-around? [1 2])
-        (three-live-around? [1 3])))))
+        (three-live-around? [1 3]))))
+  (testing "two or three live neighbors on a horizontal line"
+    (let [live-cells #{[1 1] [1 2] [1 3]}
+          two-or-three-live-around? (two-or-three-live-neighbours? live-cells)]
+      (are [x] (true? x)
+        (two-or-three-live-around? [0 1])
+        (two-or-three-live-around? [0 2])
+        (two-or-three-live-around? [0 3])
+        (two-or-three-live-around? [1 2])
+        (two-or-three-live-around? [2 1])
+        (two-or-three-live-around? [2 2])
+        (two-or-three-live-around? [2 3]))
+      (are [x] (false? x)
+        (two-or-three-live-around? [0 0])
+        (two-or-three-live-around? [0 4])
+        (two-or-three-live-around? [1 0])
+        (two-or-three-live-around? [1 1])
+        (two-or-three-live-around? [1 3])
+        (two-or-three-live-around? [1 4])
+        (two-or-three-live-around? [2 0])
+        (two-or-three-live-around? [2 4])
+        (two-or-three-live-around? [3 0]))))
+  (testing "neighbours that may come alive based on a horizontal line"
+    (let [current-generation #{[1 1] [1 2] [1 3]}
+          new (neighbors-that-may-come-alive current-generation)]
+      (is (= #{[0 2] [2 2]} (into (hash-set) new current-generation)))))
+  (testing "neighbours that may come alive based on missing cell in a square"
+    (let [current-generation #{[0 1] [1 0] [1 1]}
+          new (neighbors-that-may-come-alive current-generation)]
+      (is (= #{[0 0]} (into (hash-set) new current-generation)))))
+  (testing "nothing comes alive when everything begins dead"
+    (let [current-generation #{}
+          new (neighbors-that-may-come-alive current-generation)]
+      (is (= #{} (into (hash-set) new current-generation))))))
