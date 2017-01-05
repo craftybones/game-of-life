@@ -16,10 +16,18 @@
   [co-ord]
   (set (map (partial sum-of-vectors co-ord) neighbor-offsets)))
 
-(defn number-of-live-neighbours [current-generation]
+(defn number-of-live-neighbours
+  "Given a set of positions of live cells, returns f(x)
+  where x is a position of form [r c]. f(x) returns
+  the number of live neighbors around x."
+  [current-generation]
   (comp count (partial filter current-generation) neighboring))
 
-(defn three-live-neighbours? [current-generation]
+(defn three-live-neighbours?
+  "Given a set of positions of live cells returns f(x)
+  where x is a position of form [r c]. f(x) returns
+  true when there are exactly three live neighbors around x."
+  [current-generation]
   (comp (partial = 3) (number-of-live-neighbours current-generation)))
 
 (defn two-or-three-live-neighbours? [current-generation]
