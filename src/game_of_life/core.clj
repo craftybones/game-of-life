@@ -50,12 +50,19 @@
         (filter (complement current-generation))
         (filter (three-live-neighbours? current-generation))))
 
-(defn neighbors-that-stay-alive [current-generation]
+(defn cells-that-stay-alive
+  "Given a set of positions of live cells returns a transducer.
+  The transducer will filter co-ordinates of cells that
+  have either two or three neighbouring cells that are alive.
+
+  Effectively this forms the set of cells that continue to
+  live in the next generation."
+  [current-generation]
   (filter (two-or-three-live-neighbours? current-generation)))
 
 (defn next-generation [current-generation]
   (let [new (neighbors-that-may-come-alive current-generation)
-        existing (neighbors-that-stay-alive current-generation)]
+        existing (cells-that-stay-alive current-generation)]
     (into #{}
           (concat (sequence new current-generation)
                   (sequence existing current-generation)))))

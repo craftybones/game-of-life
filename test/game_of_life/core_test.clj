@@ -80,4 +80,22 @@
   (testing "nothing comes alive when everything begins dead"
     (let [current-generation #{}
           new (neighbors-that-may-come-alive current-generation)]
-      (is (= #{} (into (hash-set) new current-generation))))))
+      (is (= #{} (into (hash-set) new current-generation)))))
+  (testing "a crowded middle does not come alive (square with a hole)"
+    (let [current-generation #{[0 0] [0 1] [0 2]
+                               [1 0]       [1 2]
+                               [2 0] [2 1] [2 2]}
+          new (neighbors-that-may-come-alive current-generation)]
+      (is (= #{[-1 1] [1 3] [3 1] [1 -1]}
+             (into (hash-set) new current-generation)))))
+  (testing "cells that continue to live based on a horizontal line"
+    (let [current-generation #{[1 1] [1 2] [1 3]}
+          existing (cells-that-stay-alive current-generation)]
+      (is (= #{[1 2]} (into (hash-set) existing current-generation)))))
+  (testing "cells that continue to live based on right angles"
+    (let [current-generation #{[0 0] [0 1] [0 2]
+                               [1 0]       [1 2]
+                               [2 0] [2 1] [2 2]}
+          existing (cells-that-stay-alive current-generation)]
+      (is (= #{[0 0] [0 2] [2 0] [2 2]}
+             (into (hash-set) existing current-generation))))))
