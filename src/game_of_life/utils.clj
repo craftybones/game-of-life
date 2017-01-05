@@ -9,9 +9,5 @@
   \t   [9 12]"
   (partial mapv +))
 
-(def not-nil? (complement nil?))
-
-(def until-end-of
-  "Useful function to have when iterating over the length of a collection.
-  Supply any sequence/collection/countable as only argument."
-  (comp range count))
+(defmacro setify [expr]
+  `(into (hash-set) ~expr))

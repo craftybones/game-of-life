@@ -1,37 +1,41 @@
 (ns game-of-life.core
-  (:require [game-of-life.utils :refer [sum-of-vectors not-nil? until-end-of]]))
+  (:require [game-of-life.utils :refer [sum-of-vectors
+                                        setify]]))
+ 
+(def neighbor-offsets
+  "Assuming a center of [0 0] provides a set of neighboring offsets
+  that can be translated easily into neighbors of any given co-ordinate"
+  (into (hash-set) 
+        (for [i (range -1 2)
+              j (range -1 2)
+              :when (not= [i j] [0 0])] 
+          [i j])))
 
-;; (def sum-of-vectors (partial map +))
+(defn neighboring
+  "Provides the 8 neighboring co-ordinates of co-ord"
+  [co-ord]
+  (set (map (partial sum-of-vectors co-ord) neighbor-offsets)))
 
-(def neighbor-offsets 
-  (for [i (range -1 2) 
-        j (range -1 2) 
-        :when (or (not= 0 i) (not= 0 j))] 
-    [i j]))
+(defn number-of-live-neighbours [current-generation]
+  (comp count (partial filter current-generation) neighboring))
 
-(defn neighbors-of [c] 
-  (map (partial sum-of-vectors c) neighbor-offsets))
+(defn three-live-neighbours? [current-generation]
+  (comp (partial = 3) (number-of-live-neighbours current-generation)))
 
-;; (def not-nil? (complement nil?))
+(defn two-or-three-live-neighbours? [current-generation]
+  (comp #(<= 2 % 3) (number-of-live-neighbours current-generation)))
 
-(defn neighbors-of [grid co-ord] 
-  (let [cell-at (partial get-in grid)]
-    (filter not-nil? 
-            (map cell-at (neighbors-of co-ord)))))
+(defn neighbors-that-may-come-alive [current-generation]
+  (comp (mapcat neighboring)
+        (filter (complement current-generation))
+        (filter (three-live-neighbours? current-generation))))
 
-(def number-of-live (comp count (partial filter #{:live})))
+(defn neighbors-that-stay-alive [current-generation]
+  (filter (two-or-three-live-neighbours? current-generation)))
 
-(defn alive-or-dead [cell neighbors]
-  (let [alive (number-of-live neighbors)]
-    (cond
-      (= 3 alive) :live
-      (and (= 2 alive) (= cell :live)) :live
-      :else :dead)))
-
-;; (def until-end-of (comp range count))
-
-(defn tick [grid]
-  (vec (for [r (until-end-of grid)]
-         (vec (for [c (until-end-of (first grid))
-                    :let [cell (get-in grid [r c])]]
-                (alive-or-dead cell (neighbors-of grid [r c])))))))
+(defn next-generation [current-generation]
+  (let [new (neighbors-that-may-come-alive current-generation)
+        existing (neighbors-that-stay-alive current-generation)]
+    (into #{}
+          (concat (sequence new current-generation)
+                  (sequence existing current-generation)))))
