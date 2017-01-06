@@ -60,7 +60,10 @@
   [current-generation]
   (filter (two-or-three-live-neighbours? current-generation)))
 
-(defn next-generation [current-generation]
+(defn next-generation
+  "Given a set of positions of live cells returns the next
+  generation of live cells as a set of positions."
+  [current-generation]
   (let [new (neighbors-that-may-come-alive current-generation)
         existing (cells-that-stay-alive current-generation)]
     (into #{}

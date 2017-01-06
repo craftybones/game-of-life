@@ -99,3 +99,24 @@
           existing (cells-that-stay-alive current-generation)]
       (is (= #{[0 0] [0 2] [2 0] [2 2]}
              (into (hash-set) existing current-generation))))))
+
+(deftest generating-the-next-generation
+  (testing "cells that don't change in the next generation"
+    (is (= #{[0 0] [0 1]
+             [1 0] [1 1]}
+           (next-generation #{[0 0] [0 1]
+                              [1 0] [1 1]}))))
+  (testing "cells that die out in the next generation"
+    (is (= #{} (next-generation #{[0 0]}))))
+  (testing "blinker pattern"
+    (is (= #{[0 1]
+             [1 1]
+             [2 1]}
+           (next-generation #{[1 0] [1 1] [1 2]}))))
+  (testing "beehive pattern"
+    (is (=  #{     [0 1] [0 2]
+            [1 0]             [1 3]
+                  [2 1] [2 2]}
+           (next-generation #{     [0 1] [0 2]
+                              [1 0]             [1 3]
+                                   [2 1] [2 2]})))))
